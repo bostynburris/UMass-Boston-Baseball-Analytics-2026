@@ -92,7 +92,7 @@ View(run_expectancyBOS2025home)
 library(readr)
 library(tidyverse)
 
-event2025 <- read.csv("2025plays.csv")
+event2025 <- read.csv("~/UMBostonBaseballAnalytics2026_backup/2025plays.csv")
 View(event2025)
 
 event2025 <- event2025 %>%
@@ -116,7 +116,6 @@ event2025 <- event2025 %>%
     na.rm = TRUE
   )
 )
-View(event2025)
 
 event2025 <- event2025 %>%
   mutate(
@@ -128,7 +127,7 @@ event2025 <- event2025 %>%
       TRUE ~ FALSE
     )
   )
-
+View(event2025)
 
 run_expectancyMLB2025 <- event2025 %>%
   filter(outs_pre < 3) %>%
@@ -190,3 +189,5 @@ ggplot(run_expectancy_heatmap, aes(x = base_state, y = outs_pre, fill = avg_runs
     text = element_text(size = 12),
     axis.text = element_text(face = "bold")
   )
+
+
