@@ -92,7 +92,7 @@ View(run_expectancyBOS2025home)
 library(readr)
 library(tidyverse)
 
-event2025 <- read.csv("~/UMBostonBaseballAnalytics2026_backup/2025plays.csv")
+event2025 <- read.csv("~/UMBostonBaseballAnalytics2026/2025plays.csv")
 View(event2025)
 
 event2025 <- event2025 %>%
