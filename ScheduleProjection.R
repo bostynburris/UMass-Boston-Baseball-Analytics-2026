@@ -170,3 +170,111 @@ top6_prob <- rowSums(seed_probs[, 1:6])
 View(seed_probs)
 View(top6_prob)
 
+#############################################################################
+
+#### win leverage model to identify games with biggest impact
+
+target_team <- "UMB"
+
+umb_games <- conference_games[
+  conference_games$home == target_team |
+    conference_games$away == target_team,
+]
+
+nrow(umb_games)
+
+simulate_conference_games_forced <- function(games) {
+  
+  results <- rbinom(nrow(games), 1, games$away_win)
+  
+  games$winner <- ifelse(results == 1, games$away, games$home)
+  games$loser  <- ifelse(results == 1, games$home, games$away)
+  
+  # Override forced games
+  forced_idx <- which(games$forced)
+  
+  if (length(forced_idx) > 0) {
+    games$winner[forced_idx] <- games$forced_winner[forced_idx]
+    games$loser[forced_idx] <- ifelse(
+      games$home[forced_idx] == games$forced_winner[forced_idx],
+      games$away[forced_idx],
+      games$home[forced_idx]
+    )
+  }
+  
+  games
+}
+
+
+run_conditioned_sims <- function(games, n_sims = 3000) {
+  
+  seeds <- integer(n_sims)
+  
+  for (i in 1:n_sims) {
+    final_standings <- simulate_conference(games, teams)
+    seeds[i] <- final_standings$seed[final_standings$team == target_team]
+  }
+  
+  list(
+    top6 = mean(seeds <= 6),
+    avg_seed = mean(seeds)
+  )
+}
+
+leverage_for_game <- function(game_row, n_sims = 3000) {
+  
+  game_id <- game_row$game_id
+  opponent <- ifelse(
+    game_row$home == target_team,
+    game_row$away,
+    game_row$home
+  )
+  
+  games_win <- conference_games
+  games_win$forced <- FALSE
+  games_win$forced_winner <- NA
+  games_win$forced[games_win$game_id == game_id] <- TRUE
+  games_win$forced_winner[games_win$game_id == game_id] <- target_team
+  
+  win_outcome <- run_conditioned_sims(games_win, n_sims)
+  
+  games_loss <- conference_games
+  games_loss$forced <- FALSE
+  games_loss$forced_winner <- NA
+  games_loss$forced[games_loss$game_id == game_id] <- TRUE
+  games_loss$forced_winner[games_loss$game_id == game_id] <- opponent
+  
+  loss_outcome <- run_conditioned_sims(games_loss, n_sims)
+  
+  data.frame(
+    game_id = game_id,
+    opponent = opponent,
+    leverage_top6 = win_outcome$top6 - loss_outcome$top6,
+    leverage_seed = loss_outcome$avg_seed - win_outcome$avg_seed
+  )
+}
+
+umb_games <- conference_games[
+  conference_games$home == target_team |
+    conference_games$away == target_team,
+]
+
+
+system.time(
+  leverage_for_game(umb_games[1, ], n_sims = 3000)
+)
+
+leverage_results <- do.call(
+  rbind,
+  lapply(seq_len(nrow(umb_games)), function(i) {
+    leverage_for_game(umb_games[i, ])
+  })
+)
+
+leverage_results[order(-leverage_results$leverage_top6), ]
+View(leverage_results)
+
+most_recent_ncaa_baseball_season()
+
+ncaa_schedule_info(teamid = 401, year = 2024, pbp_links = FALSE)
+
