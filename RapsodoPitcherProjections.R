@@ -355,11 +355,13 @@ for (target in names(final_models_shape)) {
   projections2[[target]] <- as.vector(preds)
 }
 
-projection_adjuseted <- bind_cols(
+projection_adjusted <- bind_cols(
   rapsodo_adjusted %>% select(player),
   as_tibble(projections2)
 )
 
-View(projection_adjuseted)
+View(projection_adjusted)
+
+write.csv(projection_adjusted, 'projection_adjusted.csv', row.names = FALSE)
 
 ##################################################################
