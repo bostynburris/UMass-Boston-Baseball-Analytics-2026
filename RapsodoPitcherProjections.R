@@ -364,4 +364,6 @@ View(projection_adjusted)
 
 write.csv(projection_adjusted, 'projection_adjusted.csv', row.names = FALSE)
 
+write.csv(offensive_reports, 'offensive_reports.csv', row.names = FALSE)
+
 ##################################################################

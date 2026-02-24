@@ -270,3 +270,9 @@ optimized_results <- lapply(1:nrow(top_lineups), function(i) {
 final_lineups <- do.call(rbind, optimized_results)
 final_lineups <- final_lineups[order(-final_lineups$score), ]
 View(final_lineups)
+
+player_freq <- table(unlist(strsplit(final_lineups$lineup, " \\| ")))
+
+sort(player_freq, decreasing = TRUE)
+
+write.csv(final_lineups, 'finallineups.csv', row.names = FALSE)
