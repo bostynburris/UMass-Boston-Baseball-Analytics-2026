@@ -190,7 +190,6 @@ simulate_conference_games_forced <- function(games) {
   games$winner <- ifelse(results == 1, games$away, games$home)
   games$loser  <- ifelse(results == 1, games$home, games$away)
   
-  # Override forced games
   forced_idx <- which(games$forced)
   
   if (length(forced_idx) > 0) {
@@ -274,7 +273,99 @@ leverage_results <- do.call(
 leverage_results[order(-leverage_results$leverage_top6), ]
 View(leverage_results)
 
-most_recent_ncaa_baseball_season()
 
-ncaa_schedule_info(teamid = 401, year = 2024, pbp_links = FALSE)
+#######################################################################
+
+schedule_mar10 <- c("Mitchell", "Bridgewater State", "Worcester Polytech", "MIT", "SUNY Brockport", "SUNY Brockport",
+              "Saint Joes", "Western New England", "Stockton", "Ohio Northern", "Rutgers-Camden", "Rowan", "Mount St Vincent",
+              "Western Connecticut State", "Western Connecticut State", "Tufts", "J&W", "Keene State", "Keene State",
+              "Nichols", "Roger Williams", "Babson", "Babson", "UMass Dartmouth", "Suffolk", "Castleton State", "Castleton State",
+              "Southern Maine", "Coast Guard", "Rhode Island", "Rhode Island", "UMass Dartmouth", "Eastern Connecticut State",
+              "Eastern Connecticut State", "Southern Maine", "Salve Regina", "Plymouth State", "Plymouth State")
+
+win_prob_mar10 <- c(0, 0.7, 0.75, 1, 0, 1, 0.45, 0.7, 0.6, 0.5, 0.55, 0.5, 0.35, 0.6, 0.95, 0.95, 0.6, 0.55, 0.7, 0.7, 0.55,
+              0.6, 0.6, 0.5, 0.5, 0.65, 0.9, 0.9, 0.9, 0.65, 0.55, 0.65, 0.65, 0.65, 0.30, 0.4, 0.4, 0.65, 0.30, 0.85, 0.85)
+
+simulate_season <- function(win_prob_mar10) {
+  rbinom(length(win_prob_mar10), size = 1, prob = win_prob_mar10)
+}
+season_results <- simulate_season(win_prob_mar10)
+sum(season_results)
+
+season_wins_mar10 <- simulate_many_seasons(win_prob_mar10, n_sims = 20000)
+
+mean(season_wins_mar10)
+sd(season_wins_mar10)
+
+table(season_wins_mar10) / length(season_wins_mar10)
+
+#######################################################################
+
+
+schedule_mar19 <- c("Mitchell", "Bridgewater State", "Worcester Polytech", "MIT", "SUNY Brockport", "SUNY Brockport",
+                    "Saint Joes", "Western New England", "Stockton", "Ohio Northern", "Bethel", "Rowan", "Mount St Vincent",
+                    "Western Connecticut State", "Western Connecticut State", "Tufts", "J&W", "Keene State", "Keene State",
+                    "Nichols", "Roger Williams", "Babson", "Babson", "UMass Dartmouth", "Suffolk", "Castleton State", "Castleton State",
+                    "Southern Maine", "Coast Guard", "Rhode Island", "Rhode Island", "UMass Dartmouth", "Eastern Connecticut State",
+                    "Eastern Connecticut State", "Southern Maine", "Salve Regina", "Plymouth State", "Plymouth State")
+
+win_prob_mar19 <- c(0, 0.7, 0.75, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0.95, 0.95, 0.6, 0.55, 0.7, 0.7, 0.55,
+                    0.6, 0.6, 0.5, 0.5, 0.65, 0.9, 0.9, 0.9, 0.65, 0.55, 0.65, 0.65, 0.65, 0.30, 0.4, 0.4, 0.65, 0.30, 0.85, 0.85)
+
+simulate_season <- function(win_prob_mar19) {
+  rbinom(length(win_prob_mar19), size = 1, prob = win_prob_mar10)
+}
+season_results <- simulate_season(win_prob_mar19)
+sum(season_results)
+
+season_wins_mar19 <- simulate_many_seasons(win_prob_mar19, n_sims = 20000)
+
+mean(season_wins_mar19)
+sd(season_wins_mar19)
+
+table(season_wins_mar19) / length(season_wins_mar19)
+
+#######################################################################
+
+conference_games_Apr8 <- data.frame(
+  game_id = 1:72,
+  away = c("KSC", "KSC", "USM", "USM", "WCSU", "WCSU", "VTSUC", "VTSUC", "ECSU", "PSU", "UMB", "UMB", "UMD", "UMD", "RIC", "RIC",
+           "RIC", "RIC", "USM", "USM", "ECSU", "ECSU", "KSC", "KSC", "RIC", "UMB", "KSC", "PSU", "PSU", "PSU", "VTSUC",
+           "VTSUC", "RIC", "RIC", "USM", "USM", "UMB", "PSU", "RIC", "ECSU", "VTSUC", "VTSUC", "KSC", "KSC", "UMB", "UMB",
+           "UMD", "UMD", "USM", "VTSUC", "UMD", "RIC", "PSU", "PSU", "UMB", "UMB", "KSC", "KSC", "VTSUC", "VTSUC",
+           "VTSUC", "USM", "UMD", "WCSU", "UMD", "UMD", "WCSU", "WCSU", "ECSU", "ECSU", "PSU", "PSU"),
+  
+  home = c("RIC", "RIC", "UMD", "UMD", "UMB", "UMB", "ECSU", "ECSU", "PSU", "ECSU", "KSC", "KSC", "WCSU", "WCSU", "USM", "USM",
+           "VTSUC", "VTSUC", "WCSU", "WCSU", "UMD", "UMD", "PSU", "PSU", "WCSU", "UMD", "VTSUC", "USM", "WCSU", "WCSU", "UMB",
+           "UMB", "ECSU", "ECSU", "KSC", "KSC", "USM", "VTSUC", "UMD", "WCSU", "WCSU", "WCSU", "ECSU", "ECSU", "RIC", "RIC",
+           "PSU", "PSU", "PSU", "KSC", "UMB", "WCSU", "RIC", "RIC", "ECSU", "ECSU", "UMD", "UMD", "USM", "USM",
+           "PSU", "UMB", "RIC", "ECSU", "VTSUC", "VTSUC", "KSC", "KSC", "USM", "USM", "UMB", "UMB"),
+  
+  away_win = c(1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0.7, 0.7,
+               1, 0, 1, 0, 0.15, 0.65, 0.65, 0.2, 0.2, 0.1, 0.1, 0.6, 0.6, 0.4, 0.4, 0.25, 0.95, 0.8, 0.8, 0.35, 0.35, 0.85,
+               0.85, 0.75, 0.75, 0.9, 0.3, 0.4, 0, 0.5, 0.5, 0.45, 0.45, 0.5, 0.5, 0.2, 0.2, 0.8, 0.55, 0.8, 0.7, 0.7, 0.05, 0.05,
+               0.6, 0.6, 0.1, 0.1)
+)
+
+teams_Apr8 <- sort(unique(c(conference_games_Apr8$away, conference_games_Apr8$home)))
+teams_Apr8
+
+seed_results_Apr8 <- matrix(0, nrow = length(teams_Apr8), ncol = 9,
+                       dimnames = list(teams_Apr8, paste0("Seed_", 1:9)))
+
+for (i in 1:n_sims) {
+  final_standings <- simulate_conference(conference_games_Apr8, teams_Apr8)
+  
+  for (t in teams) {
+    s <- final_standings$seed[final_standings$team == t]
+    seed_results_Apr8[t, s] <- seed_results_Apr8[t, s] + 1
+  }
+}
+
+seed_probs_Apr8 <- seed_results_Apr8 / n_sims
+
+top6_prob_Apr8 <- rowSums(seed_probs_Apr8[, 1:6])
+
+View(seed_probs_Apr8)
+View(top6_prob_Apr8)
 
