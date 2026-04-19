@@ -369,3 +369,124 @@ top6_prob_Apr8 <- rowSums(seed_probs_Apr8[, 1:6])
 View(seed_probs_Apr8)
 View(top6_prob_Apr8)
 
+#######################################################################
+
+schedule_Apr8 <- c("Mitchell", "Bridgewater State", "Worcester Polytech", "MIT", "SUNY Brockport", "SUNY Brockport",
+                    "Saint Joes", "Western New England", "Stockton", "Ohio Northern", "Bethel", "Rowan", "Mount St Vincent",
+                    "Western Connecticut State", "Western Connecticut State", "Tufts", "J&W", "Keene State", "Keene State",
+                    "Nichols", "Roger Williams", "Babson", "Babson", "UMass Dartmouth", "Suffolk", "Castleton State", "Castleton State",
+                    "Southern Maine", "Coast Guard", "Rhode Island", "Rhode Island", "UMass Dartmouth", "Eastern Connecticut State",
+                    "Eastern Connecticut State", "Endicott College", "Southern Maine", "Salve Regina", "Plymouth State", "Plymouth State")
+
+current_wins <- 13
+current_losses <- 10
+games_played <- current_wins + current_losses
+remaining_probs <- win_prob_Apr8[(games_played + 1):length(win_prob_Apr8)]
+
+win_prob_Apr8 <- c(0, 0.7, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0.55, 1, 0, 1,
+                    1, 1, 0, 0, 0.8, 0.85, 0.85, 0.45, 0.6, 0.8, 0.8, 0.65, 0.65, 0.45, 0.45, 0.25, 0.45, 0.2, 0.9, 0.9)
+
+simulate_season <- function(remaining_probs, current_wins) {
+  future_wins <- sum(rbinom(length(remaining_probs), size = 1, prob = remaining_probs))
+  total_wins <- current_wins + future_wins
+  return(total_wins)
+}
+
+simulate_many_seasons <- function(remaining_probs, current_wins, n_sims = 20000) {
+  replicate(n_sims, simulate_season(remaining_probs, current_wins))
+}
+
+season_wins_Apr8 <- simulate_many_seasons(remaining_probs, current_wins, 20000)
+season_results <- simulate_season(win_prob_Apr8, current_wins)
+sum(season_results)
+
+season_wins_Apr8 <- simulate_many_seasons(win_prob_Apr8, current_wins, n_sims = 20000)
+
+mean(season_wins_Apr8)
+sd(season_wins_Apr8)
+
+table(season_wins_Apr8) / length(season_wins_Apr8)
+
+#######################################################################
+
+
+conference_games_Apr18 <- data.frame(
+  game_id = 1:72,
+  away = c("KSC", "KSC", "USM", "USM", "WCSU", "WCSU", "VTSUC", "VTSUC", "ECSU", "PSU", "UMB", "UMB", "UMD", "UMD", "RIC", "RIC",
+           "RIC", "RIC", "USM", "USM", "ECSU", "ECSU", "KSC", "KSC", "RIC", "UMB", "KSC", "PSU", "PSU", "PSU", "VTSUC",
+           "VTSUC", "RIC", "RIC", "USM", "USM", "UMB", "PSU", "RIC", "ECSU", "VTSUC", "VTSUC", "KSC", "KSC", "UMB", "UMB",
+           "UMD", "UMD", "USM", "VTSUC", "UMD", "RIC", "PSU", "PSU", "UMB", "UMB", "KSC", "KSC", "VTSUC", "VTSUC",
+           "VTSUC", "USM", "UMD", "WCSU", "UMD", "UMD", "WCSU", "WCSU", "ECSU", "ECSU", "PSU", "PSU"),
+  
+  home = c("RIC", "RIC", "UMD", "UMD", "UMB", "UMB", "ECSU", "ECSU", "PSU", "ECSU", "KSC", "KSC", "WCSU", "WCSU", "USM", "USM",
+           "VTSUC", "VTSUC", "WCSU", "WCSU", "UMD", "UMD", "PSU", "PSU", "WCSU", "UMD", "VTSUC", "USM", "WCSU", "WCSU", "UMB",
+           "UMB", "ECSU", "ECSU", "KSC", "KSC", "USM", "VTSUC", "UMD", "WCSU", "WCSU", "WCSU", "ECSU", "ECSU", "RIC", "RIC",
+           "PSU", "PSU", "PSU", "KSC", "UMB", "WCSU", "RIC", "RIC", "ECSU", "ECSU", "UMD", "UMD", "USM", "USM",
+           "PSU", "UMB", "RIC", "ECSU", "VTSUC", "VTSUC", "KSC", "KSC", "USM", "USM", "UMB", "UMB"),
+  
+  away_win = c(1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1,
+               1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0,
+               0, 1, 1, 0.9, 0.2, 0.4, 0, 0.5, 0.5, 0.45, 0.45, 0.5, 0.5, 0.2, 0.2, 0.8, 0.55, 0.8, 0.7, 0.7, 0.7, 0.05, 0.05,
+               0.6, 0.6, 0.1, 0.1)
+)
+
+teams_Apr18 <- sort(unique(c(conference_games_Apr18$away, conference_games_Apr18$home)))
+teams_Apr18
+
+seed_results_Apr18 <- matrix(0, nrow = length(teams_Apr18), ncol = 9,
+                            dimnames = list(teams_Apr18, paste0("Seed_", 1:9)))
+
+for (i in 1:n_sims) {
+  final_standings <- simulate_conference(conference_games_Apr18, teams_Apr18)
+  
+  for (t in teams) {
+    s <- final_standings$seed[final_standings$team == t]
+    seed_results_Apr18[t, s] <- seed_results_Apr18[t, s] + 1
+  }
+}
+
+seed_probs_Apr18 <- seed_results_Apr18 / n_sims
+
+top6_prob_Apr18 <- rowSums(seed_probs_Apr18[, 1:6])
+
+View(seed_probs_Apr18)
+View(top6_prob_Apr18)
+
+#######################################################################
+
+schedule_Apr18 <- c("Mitchell", "Curry", "Worcester Polytech", "MIT", "SUNY Brockport", "SUNY Brockport",
+                   "Saint Joes", "Western New England", "Stockton", "Ohio Northern", "Bethel", "Rowan", "Mount St Vincent",
+                   "Western Connecticut State", "Western Connecticut State", "Tufts", "J&W", "Keene State", "Keene State",
+                   "Nichols", "Roger Williams", "Babson", "Babson", "UMass Dartmouth", "Suffolk", "Castleton State", "Castleton State",
+                   "Southern Maine", "Coast Guard", "Rhode Island", "Rhode Island", "UMass Dartmouth", "Eastern Connecticut State",
+                   "Eastern Connecticut State", "Endicott College", "Southern Maine", "Salve Regina", "Plymouth State", "Plymouth State")
+
+current_wins <- 16
+current_losses <- 14
+games_played <- current_wins + current_losses
+
+win_prob_Apr18 <- c(0, 0.85, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0.55, 1, 0, 1,
+                   1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0.65, 0.65, 0.45, 0.45, 0.25, 0.45, 0.2, 0.9, 0.9)
+
+remaining_probs <- win_prob_Apr18[(games_played + 1):length(win_prob_Apr18)]
+
+simulate_season <- function(remaining_probs, current_wins) {
+  future_wins <- sum(rbinom(length(remaining_probs), size = 1, prob = remaining_probs))
+  total_wins <- current_wins + future_wins
+  return(total_wins)
+}
+
+simulate_many_seasons <- function(remaining_probs, current_wins, n_sims = 20000) {
+  replicate(n_sims, simulate_season(remaining_probs, current_wins))
+}
+
+season_wins_Apr18 <- simulate_many_seasons(remaining_probs, current_wins, 20000)
+season_results <- simulate_season(remaining_probs, current_wins)
+sum(season_results)
+
+season_wins_Apr18 <- simulate_many_seasons(remaining_probs, current_wins, n_sims = 20000)
+
+mean(season_wins_Apr18)
+sd(season_wins_Apr18)
+
+table(season_wins_Apr18) / length(season_wins_Apr18)
