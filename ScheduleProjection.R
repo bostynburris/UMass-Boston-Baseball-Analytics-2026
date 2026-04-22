@@ -490,3 +490,48 @@ mean(season_wins_Apr18)
 sd(season_wins_Apr18)
 
 table(season_wins_Apr18) / length(season_wins_Apr18)
+
+#######################################################################
+
+conference_games_Apr22 <- data.frame(
+  game_id = 1:72,
+  away = c("KSC", "KSC", "USM", "USM", "WCSU", "WCSU", "VTSUC", "VTSUC", "ECSU", "PSU", "UMB", "UMB", "UMD", "UMD", "RIC", "RIC",
+           "RIC", "RIC", "USM", "USM", "ECSU", "ECSU", "KSC", "KSC", "RIC", "UMB", "KSC", "PSU", "PSU", "PSU", "VTSUC",
+           "VTSUC", "RIC", "RIC", "USM", "USM", "UMB", "PSU", "RIC", "ECSU", "VTSUC", "VTSUC", "KSC", "KSC", "UMB", "UMB",
+           "UMD", "UMD", "USM", "VTSUC", "UMD", "RIC", "PSU", "PSU", "UMB", "UMB", "KSC", "KSC", "VTSUC", "VTSUC",
+           "VTSUC", "USM", "UMD", "WCSU", "UMD", "UMD", "WCSU", "WCSU", "ECSU", "ECSU", "PSU", "PSU"),
+  
+  home = c("RIC", "RIC", "UMD", "UMD", "UMB", "UMB", "ECSU", "ECSU", "PSU", "ECSU", "KSC", "KSC", "WCSU", "WCSU", "USM", "USM",
+           "VTSUC", "VTSUC", "WCSU", "WCSU", "UMD", "UMD", "PSU", "PSU", "WCSU", "UMD", "VTSUC", "USM", "WCSU", "WCSU", "UMB",
+           "UMB", "ECSU", "ECSU", "KSC", "KSC", "USM", "VTSUC", "UMD", "WCSU", "WCSU", "WCSU", "ECSU", "ECSU", "RIC", "RIC",
+           "PSU", "PSU", "PSU", "KSC", "UMB", "WCSU", "RIC", "RIC", "ECSU", "ECSU", "UMD", "UMD", "USM", "USM",
+           "PSU", "UMB", "RIC", "ECSU", "VTSUC", "VTSUC", "KSC", "KSC", "USM", "USM", "UMB", "UMB"),
+  
+  away_win = c(1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1,
+               1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0,
+               0, 1, 1, 1, 0, 1, 0, 0.5, 0.5, 0.45, 0.45, 0.5, 0.5, 0.2, 0.2, 0.8, 0.55, 0.8, 0.7, 0.7, 0.7, 0.05, 0.05,
+               0.6, 0.6, 0.1, 0.1)
+)
+
+teams_Apr22 <- sort(unique(c(conference_games_Apr22$away, conference_games_Apr22$home)))
+teams_Apr22
+
+seed_results_Apr22 <- matrix(0, nrow = length(teams_Apr22), ncol = 9,
+                             dimnames = list(teams_Apr22, paste0("Seed_", 1:9)))
+
+for (i in 1:n_sims) {
+  final_standings <- simulate_conference(conference_games_Apr22, teams_Apr22)
+  
+  for (t in teams) {
+    s <- final_standings$seed[final_standings$team == t]
+    seed_results_Apr22[t, s] <- seed_results_Apr22[t, s] + 1
+  }
+}
+
+seed_probs_Apr22 <- seed_results_Apr22 / n_sims
+
+top6_prob_Apr22 <- rowSums(seed_probs_Apr22[, 1:6])
+
+View(seed_probs_Apr22)
+View(top6_prob_Apr22)
+
